@@ -98,6 +98,7 @@ R-package/src/Makevars
 
 # Visual Studio Code
 /.vscode/
+/vs2019/
 
 # IntelliJ/CLion
 .idea
