@@ -217,7 +217,22 @@ endif (JVM_BINDINGS)
 #-- End shared library
 
 #-- CLI for xgboost
-add_executable(runxgboost ${xgboost_SOURCE_DIR}/src/cli_main.cc)
+add_executable(runxgboost ${xgboost_SOURCE_DIR}/src/cli_main.cc
+${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/abstract_voronoi_segmentation.cpp
+${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/adaboost_classifier.cpp
+${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/clique_class.cpp
+${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/contains.cpp
+${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/distance_segmentation.cpp
+${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/features.cpp
+${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/meanshift2d.cpp
+${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/morphological_segmentation.cpp
+${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/raycasting.cpp
+${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/room_class.cpp
+${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/voronoi_random_field_features.cpp
+${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/voronoi_segmentation.cpp
+${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/wavefront_region_growing.cpp
+${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/xgboost_classifier.cpp
+)
 target_link_libraries(runxgboost PRIVATE objxgboost)
 if (USE_NVTX)
   enable_nvtx(runxgboost)
