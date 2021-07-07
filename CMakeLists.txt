@@ -216,23 +216,65 @@ if (JVM_BINDINGS)
 endif (JVM_BINDINGS)
 #-- End shared library
 
-#-- CLI for xgboost
-add_executable(runxgboost ${xgboost_SOURCE_DIR}/src/cli_main.cc
-${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/abstract_voronoi_segmentation.cpp
-${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/adaboost_classifier.cpp
-${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/clique_class.cpp
-${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/contains.cpp
-${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/distance_segmentation.cpp
-${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/features.cpp
-${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/meanshift2d.cpp
-${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/morphological_segmentation.cpp
-${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/raycasting.cpp
-${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/room_class.cpp
-${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/voronoi_random_field_features.cpp
-${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/voronoi_segmentation.cpp
-${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/wavefront_region_growing.cpp
-${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/xgboost_classifier.cpp
+set(
+    cli_demo_list
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/abstract_voronoi_segmentation.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/adaboost_classifier.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/clique_class.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/contains.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/distance_segmentation.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/features.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/meanshift2d.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/morphological_segmentation.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/raycasting.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/room_class.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/voronoi_random_field_features.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/voronoi_segmentation.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/wavefront_region_growing.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/xgboost_classifier.cpp
 )
+
+set(
+    cli_demo_headers
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/abstract_voronoi_segmentation.h
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/adaboost_classifier.h
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/clique_class.h
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/contains.h
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/distance_segmentation.h
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/fast_math.h
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/features.h
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/meanshift2d.h
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/morphological_segmentation.h
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/raycasting.h
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/room_class.h
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/voronoi_random_field_features.h
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/voronoi_segmentation.h
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/wavefront_region_growing.h
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/xgboost_classifier.h    
+)
+
+set(
+    cli_demo_utils
+    ${xgboost_SOURCE_DIR}/include/post-processing.h
+    ${xgboost_SOURCE_DIR}/include/pre-processing.h
+    ${xgboost_SOURCE_DIR}/include/utils.h
+)
+
+foreach(source IN LISTS cli_demo_headers)    
+    source_group("Header Files/ipa_room_segmentation" FILES "${source}")
+endforeach()
+
+foreach(source IN LISTS cli_demo_utils)    
+    source_group("Header Files" FILES "${source}")
+endforeach()
+
+foreach(source IN LISTS cli_demo_list)    
+    source_group("Source Files/ipa_room_segmentation" FILES "${source}")
+endforeach()
+
+#-- CLI for xgboost
+add_executable(runxgboost ${xgboost_SOURCE_DIR}/src/cli_main.cc ${cli_demo_list} ${cli_demo_utils} ${cli_demo_headers})
+
 target_link_libraries(runxgboost PRIVATE objxgboost)
 if (USE_NVTX)
   enable_nvtx(runxgboost)
