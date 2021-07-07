@@ -42,7 +42,7 @@
 #include <ipa_room_segmentation/morphological_segmentation.h>
 #include <ipa_room_segmentation/voronoi_segmentation.h>
 #include <ipa_room_segmentation/adaboost_classifier.h>
- //#include <ipa_room_segmentation/xgboost_classifier.h>
+#include <ipa_room_segmentation/xgboost_classifier.h>
 #include <ipa_room_segmentation/voronoi_random_field_segmentation.h>
 
 using namespace cv;
@@ -994,8 +994,8 @@ int main(int argc, char* argv[]) {
       if (room_segmentation_algorithm == 6) { //xgboost
         doorway_points_.clear();
         const std::string classifier_path = package_path + "files\\classifier_models\\";
-        //XgboostClassifier xgClassifier;
-        //xgClassifier.segmentMap(original_img, segmented_map, map_resolution, classifier_path);
+        XgboostClassifier xgClassifier;
+        xgClassifier.segmentMap(original_img, segmented_map, map_resolution, classifier_path);
         std::cout << "You have chosen the Voronoi random field segmentation." << std::endl;
         continue;
       }
