@@ -231,7 +231,8 @@ set(
     ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/voronoi_random_field_features.cpp
     ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/voronoi_segmentation.cpp
     ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/wavefront_region_growing.cpp
-    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/xgboost_classifier.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/evaluation_segmentation.cpp
+    ${xgboost_SOURCE_DIR}/src/ipa_room_segmentation/xgboost_classifier.cpp    
 )
 
 set(
@@ -250,7 +251,8 @@ set(
     ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/voronoi_random_field_features.h
     ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/voronoi_segmentation.h
     ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/wavefront_region_growing.h
-    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/xgboost_classifier.h    
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/evaluation_segmentation.h    
+    ${xgboost_SOURCE_DIR}/include/ipa_room_segmentation/xgboost_classifier.h
 )
 
 set(
