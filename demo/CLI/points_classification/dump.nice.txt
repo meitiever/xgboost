@@ -1,0 +1,8 @@
+booster[0]:
+0:[y-coordinates=0] yes=2,no=1
+	1:leaf=-1.71428573
+	2:leaf=1.67999995
+booster[1]:
+0:[y-coordinates=0] yes=2,no=1
+	1:leaf=-0.892521739
+	2:leaf=0.87258029
