@@ -17,11 +17,12 @@ XgboostClassifier::XgboostClassifier() {
 }
 
 bool XgboostClassifier::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& segmented_map, double map_resolution_from_subscription,
-  const std::string& model_in) {
+  const std::string& model_path) {
+  std::string model = model_path + "semantic_room_xgboost_r100.model";
   if (!trained_) {
     // load model
-    CHECK_NE(model_in, CLIParam::kNull) << "Must specify model_in for predict";
-    loadModel(model_in, learner_.get());
+    CHECK_NE(model, CLIParam::kNull) << "Must specify model_in for predict";
+    loadModel(model, learner_.get());
   }
 
   std::cout << "Start prediction...";

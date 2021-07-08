@@ -226,6 +226,7 @@ namespace xgboost {
     }
 
     void CLITrain() {
+      std::cout << "CLI Train Started." << std::endl;
       const double tstart_data_load = dmlc::GetTime();
       if (rabit::IsDistributed()) {
         std::string pname = rabit::GetProcessorName();
@@ -361,50 +362,8 @@ namespace xgboost {
     }
 
     void CLIPredict() {
-      //std::vector<double> angles_for_simulation_;
-      //for (double angle = 0; angle < 360; angle++) {
-      //  angles_for_simulation_.push_back(angle);
-      //}
-
-      //LaserScannerRaycasting raycasting_;
-
       CHECK_NE(param_.test_path, CLIParam::kNull)
         << "Test dataset parameter test:data must be specified.";
-
-      //boost::filesystem::path p(param_.test_path);
-      //if (boost::filesystem::is_regular_file(p)) {
-      //  cv::Mat original_map_to_be_labeled = cv::imread(param_.test_path, 0);
-
-      //  for (int y = 0; y < original_map_to_be_labeled.rows; y++) {
-      //    LaserScannerFeatures lsf;
-
-      //    for (int x = 0; x < original_map_to_be_labeled.cols; x++) {
-      //      if (original_map_to_be_labeled.at<unsigned char>(y, x) == 255) {
-      //        std::vector<double> temporary_beams;
-      //        raycasting_.raycasting(original_map_to_be_labeled, cv::Point(x, y), temporary_beams);
-      //        std::vector<float> temporary_features;
-      //        cv::Mat features_mat; //OpenCV expects a 32-floating-point Matrix as feature input
-      //        lsf.get_features(temporary_beams, angles_for_simulation_, cv::Point(x, y), features_mat);
-      //        //classify each Point
-      //        std::shared_ptr<DMatrix> dtest = MatToDMat(features_mat);
-      //        HostDeviceVector<bst_float> preds;
-      //        learner_->Predict(dtest, param_.pred_margin, &preds, param_.iteration_begin,
-      //          param_.iteration_end);
-      //        LOG(CONSOLE) << "Writing prediction to " << param_.name_pred;
-
-      //        double probability_for_room = 0.0;
-      //        double probability_for_hallway = 0.0 * (1.0 - probability_for_room);
-
-      //        if (probability_for_room > probability_for_hallway) {
-      //          original_map_to_be_labeled.at<unsigned char>(y, x) = 150; //label it as room
-      //        }
-      //        else {
-      //          original_map_to_be_labeled.at<unsigned char>(y, x) = 100; //label it as hallway
-      //        }
-      //      }
-      //    }
-      //  }
-      //}
 
       // load data
       std::shared_ptr<DMatrix> dtest(DMatrix::Load(
@@ -535,6 +494,7 @@ namespace xgboost {
         this->PrintHelp();
         exit(1);
       }
+
       for (int i = 0; i < argc; ++i) {
         std::string str{ argv[i] };
         if (str == "-h" || str == "--help") {
@@ -546,6 +506,7 @@ namespace xgboost {
           break;
         }
       }
+
       if (print_info_ != kNone) {
         return;
       }
@@ -616,6 +577,19 @@ static void help(char** argv)
 }
 
 int main(int argc, char* argv[]) {
+  //try {
+  //  std::cout << "parse parameter." << std::endl;
+  //  xgboost::CLI cli(argc, argv);
+  //  std::cout << "xgboost run." << std::endl;
+  //  return cli.Run();
+  //}
+  //catch (dmlc::Error const& e) {
+  //  // This captures only the initialization error.
+  //  xgboost::CLIError(e);
+  //  return 1;
+  //}
+  //return 0;
+
   cv::CommandLineParser parser(argc, argv,
     "{help h ? |      | help message}"
     "{root     | D:\\Github\\Tools\\xgboost\\ | root path of file }"
@@ -723,7 +697,7 @@ int main(int argc, char* argv[]) {
   possible_labels[2] = 179;
 
   std::string map_path = package_path + "files\\test_maps\\";
-  const std::string segmented_map_path = package_path + "files\\segmented_maps\\";
+  std::string segmented_map_path = package_path + "files\\segmented_maps\\";
 
   // strings that stores the path to the saving files
   std::string conditional_weights_path = package_path + "files\\classifier_models\\conditional_field_weights.txt";
@@ -878,12 +852,6 @@ int main(int argc, char* argv[]) {
     std::exit(0);
   }
 
-  if (!boost::filesystem::exists(segmented_map_path)) {
-    const std::string command = "mkdir -p " + segmented_map_path;
-    int return_value = system(command.c_str());
-    std::cout << "segmented map folder " << segmented_map_path << " created.'" << std::endl;
-  }
-
   double map_resolution = 0.05;
   std::vector<cv::Point> door_points;
   std::vector<cv::Point> doorway_points_; // vector that saves the found doorway points, when using the 5th algorithm (vrf)
@@ -891,11 +859,11 @@ int main(int argc, char* argv[]) {
 
   PreProcessor pre;
   std::vector<std::string> segmentation_names;
-  segmentation_names.push_back("1morphological");
-  segmentation_names.push_back("2distance");
-  segmentation_names.push_back("3voronoi");
-  segmentation_names.push_back("4semantic");
-  segmentation_names.push_back("5vrf");
+  //segmentation_names.push_back("1morphological");
+  //segmentation_names.push_back("2distance");
+  //segmentation_names.push_back("3voronoi");
+  //segmentation_names.push_back("4semantic");
+  //segmentation_names.push_back("5vrf");
   segmentation_names.push_back("6xgboost");
 
   std::vector<cv::Mat> results(segmentation_names.size());
@@ -916,7 +884,7 @@ int main(int argc, char* argv[]) {
     //load map
     std::string map_name = map_names[image_index];
     std::string image_filename = map_path + map_name + ".png";
-    std::cout << "map: " << image_filename << std::endl;
+    std::cout << "load test map: " << image_filename << std::endl;
     cv::Mat map = cv::imread(image_filename.c_str(), 0);
     cv::Mat original_img;
 
