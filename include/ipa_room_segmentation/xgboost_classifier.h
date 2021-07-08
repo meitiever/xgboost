@@ -165,7 +165,7 @@ protected:
 
 public:
 
-  XgboostClassifier();
+  XgboostClassifier(std::string& model_path);
 
   int resetLearner(std::vector<std::shared_ptr<DMatrix>> const& matrices) {
     learner_.reset(Learner::Create(matrices));
@@ -213,6 +213,5 @@ public:
   }
 
   //labeling-algorithm after the training
-  bool segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& segmented_map, double map_resolution_from_subscription,
-    const std::string& model_in);
+  bool segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& segmented_map, double map_resolution_from_subscription);
 };

@@ -8,21 +8,26 @@
 #include <ipa_room_segmentation/xgboost_classifier.h>
 #include <ipa_room_segmentation/wavefront_region_growing.h>
 
-XgboostClassifier::XgboostClassifier() {
+#include "../src/common/config.h"
+
+XgboostClassifier::XgboostClassifier(std::string& config_path) {
   for (double angle = 0; angle < 360; angle++) {
     angles_for_simulation_.push_back(angle);
   }
 
   trained_ = false;
+  //std::string model = model_path + "semantic_room_xgboost_r100.model";
+
+  common::ConfigParser cp(config_path);
+  auto cfg = cp.Parse();
+
+  param_.Configure(cfg);
 }
 
-bool XgboostClassifier::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& segmented_map, double map_resolution_from_subscription,
-  const std::string& model_path) {
-  std::string model = model_path + "semantic_room_xgboost_r100.model";
+bool XgboostClassifier::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& segmented_map, double map_resolution_from_subscription) {
   if (!trained_) {
     // load model
-    CHECK_NE(model, CLIParam::kNull) << "Must specify model_in for predict";
-    loadModel(model, learner_.get());
+    resetLearner({});
   }
 
   std::cout << "Start prediction...";
