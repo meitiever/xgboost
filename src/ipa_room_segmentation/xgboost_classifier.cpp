@@ -12,7 +12,7 @@ bool XgboostClassifier::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& se
   double room_area_factor_lower_limit, double room_area_factor_upper_limit) {
   std::cout << "Start prediction..." << std::endl;
 
-  cv::Mat original_map_to_be_labeled = map_to_be_labeled.clone();
+  cv::Mat original_map_to_be_labeled = cv::Mat(map_to_be_labeled.size(), CV_8U);
 
   std::vector<double> temporary_beams;
   std::vector<float> temporary_features;
@@ -35,13 +35,13 @@ bool XgboostClassifier::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& se
           , features.at<float>(0, 15), features.at<float>(0, 16), features.at<float>(0, 17), features.at<float>(0, 18), features.at<float>(0, 19)
           , features.at<float>(0, 20), features.at<float>(0, 21), features.at<float>(0, 22);
 
-        Matrix y;
-        int ret = predict(d_features, y);
+        Matrix result;
+        int ret = predict(d_features, result);
         if (ret != 0) {
           std::cout << "predict error" << std::endl;
         }
 
-        double probability_for_room = y[0];
+        double probability_for_room = result(0, 0);
         double probability_for_hallway = 1.0 - probability_for_room;
 
         if (probability_for_room > probability_for_hallway) {
