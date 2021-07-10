@@ -20,7 +20,7 @@ public:
   PreProcessor() { } // default constructor
 
   //training-method for the classifier
-  void Process(const cv::Mat& img, cv::Mat& out) {
+  cv::Mat Process(const cv::Mat& img, cv::Mat& out) {
     std::cout << "********Pre Process Map************" << std::endl;
     out = img.clone();
     if (img.channels() == 3) {
@@ -56,5 +56,46 @@ public:
         }
       }
     }
+
+    std::vector<double> angles_for_simulation_; // angle-vector used to calculate the features for this algorithm
+    std::vector<double> temporary_beams;
+    LaserScannerRaycasting raycasting_;
+
+    for (double angle = 0; angle < 360; angle++) {
+      angles_for_simulation_.push_back(angle);
+    }
+
+    int num_features = 0;
+    for (int y = 0; y < img.rows; y++) {
+      for (int x = 0; x < img.cols; x++) {
+        if (img.at<unsigned char>(y, x) != 0) {
+          num_features++;
+        }
+      }
+    }
+
+    cv::Mat features = cv::Mat(num_features, 23, CV_32FC1);
+
+    num_features = 0;
+#pragma omp parallel for
+    for (int y = 0; y < img.rows; y++) {
+      LaserScannerFeatures lsf;
+
+      for (int x = 0; x < img.cols; x++) {
+        if (img.at<unsigned char>(y, x) != 0) {
+          std::vector<double> temporary_beams;
+          //simulate the beams and features for every position and save it
+          raycasting_.raycasting(img, cv::Point(x, y), temporary_beams);
+          cv::Mat feature;
+          lsf.get_features(temporary_beams, angles_for_simulation_, cv::Point(x, y), feature);
+          // write features
+          for (int i = 0; i < feature.cols; ++i)
+            features.at<float>(num_features, i) = feature.at<float>(0, i);
+          num_features++;
+        }
+      }
+    }
+
+    return features;
   }
 };

@@ -32,7 +32,7 @@ public:
     const std::string& classifier_storage_path, const bool& save_to_csv);
 
   //labeling-algorithm after the training
-  bool segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& segmented_map, double map_resolution_from_subscription,
+  bool segmentMap(const cv::Mat& map_to_be_labeled, const cv::Mat& map_features, cv::Mat& segmented_map, double map_resolution_from_subscription,
     double room_area_factor_lower_limit, double room_area_factor_upper_limit,
     const std::string& classifier_storage_path, bool display_results = false);
 };

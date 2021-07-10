@@ -1,0 +1,98 @@
+
+1. morphological segmentation
+	1. collect the map data
+	2. erode the map to extract contours
+	3. find the extracted contures and save them if they fullfill the room-area criterion
+	4. draw and fill the saved contoures in a clone of the map from 1. with a random colour
+	5. get the obstacle information from the original map and draw them in the clone from 4.
+	6. spread the coloured regions to the white Pixels
+
+2. distance_segmentation
+	1. Get the distance-transformed map and make it an 8-bit single-channel image
+		cv::erode
+		cv::distanceTransform
+		cv::convertScaleAbs
+	2. Threshold the map and find the contours of the rooms. Change the threshold and repeat steps until last possible threshold.
+		for(threshold from 0-255) {
+		  cv::threshold(distance_map, thresh_map, current_threshold, 255, cv::THRESH_BINARY);
+		  cv::findContours(thresh_map, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_NONE);
+		}
+	3. Then take the contours from the threshold with the most contours between the roomfactors and draw it in the map with a random color.
+
+
+3. voronoi_segmentation
+//This function takes a given map and segments it with the generalized Voronoi-Diagram. It takes following steps:
+I.  It calculates the generalized Voronoi-Diagram using the function createVoronoiGraph.
+II. It extracts the critical points, which show the border between two segments. This part takes these steps:
+        1. Extract node-points of the Voronoi-Diagram, which have at least 3 neighbors.
+        2. Reduce the leave-nodes (Point on graph with only one neighbor) of the graph until the reduction
+	   hits a node-Point. This is done to reduce the lines along the real voronoi-graph, coming from the discretisation
+	   of the contour.
+	3. Find the critical points in the reduced graph by searching in a specified neighborhood for a local minimum
+	   in distance to the nearest black pixel. The size of the epsilon-neighborhood is dynamic and goes larger
+	   in small areas, so they are split into lesser regions.
+III. It gets the critical lines, which go from the critical point to its two nearest black pixels and separate the regions from each other. This part does following steps:
+	1. Get the discretized contours of the map and the holes, because these are the possible candidates for basis-points.
+	2. Find the basis-points for each critical-point by finding the two nearest neighbors of the vector from 1.
+	   Also it saves the angle between the two vectors pointing from the critical-point to its two basis-points.
+	3. Some critical-lines are too close to each other, so the next part eliminates some of them. For this the
+	   algorithm checks, which critical points are too close to each other. Then it compares the angles of these
+	   points, which were calculated in 3., and takes the one with the larger angle, because smaller angles
+	   (like 90 degree) are more likely to be at edges of the map or are too close to the borders. If they have
+	   the same angle, the point which comes first in the critical-point-vector is chosen (took good results for
+	   me, but is only subjective).
+	4. Draw the critical lines, selected by 3. in the map with color 0.
+IV. It finds the segments, which are seperated by the critical lines of III. and fills them with a random colour that hasn't been already used yet. For this it:
+	1. It erodes the map with critical lines, so small gaps are closed, and finds the contours of the segments.
+	   Only contours that are large/small enough are chosen to be drawn.
+	2. It draws the contours from 1. in a map with a random colour. Contours that belong to holes are not drawn into the map.
+	3. Spread the colour-regions to the last white Pixels, using the watershed-region-spreading function.
+
+4. adaboost_classifier
+I.  Training steps
+	1. load room training image and hallway images, there are five images for each of the class.
+	2. calc LaserScannerFeatures for each pixel of images.
+	   2.1 LaserScannerFeatures，feature 1-23
+		feature 1 当前点(x,y)的beams 前后2个元素之差的均值
+		feature 2 sqrt(当前点(x,y)的beam的标准差之合/(number_of_beam - 1))
+		feature 3 average difference of the to a max_value limited beams
+		feature 4 The Standard Deviation of the difference of limited beams
+		feature 5 The mean of the beamlenghts
+		feature 6 The standard deviation of the beamlenghts
+		feature 7 The number of gaps between the beams
+		feature 8 The distance between two Endpoints of local minima of beamlenghts
+		feature 9 The Angle between two Endpoints of local minima of beamlengths
+		feature 10 The average of the relations (b_i/b_(i+1)) between two neighboring beams
+		feature 11 The standard deviation of the relations (b_i/b_(i+1)) between two neighboring beams
+		feature 12 The number of relative gaps.
+		feature 13 The Kurtosis
+		feature 14 The area of the polygonal approximation of the beams
+		feature 15 The perimeter of the polygonal approximation of the beams
+		feature 16 The quotient of area divided by perimeter of the polygonal approximation of the beams
+		feature 17 The average of the distance between the centroid and the boundary-Points of the polygonal approximation
+		feature 18 The standard deviation of the distance between the centroid and the boundary-Points
+		feature 19 The half major axis of the bounding ellipse, calculatet with openCV
+		feature 20 The half minor axis of the bounding ellipse, calculated with openCV
+		feature 21 The Quotient of half the major axis and half the minor axis
+		feature 22 The average of the beam lengths divided by the maximal length
+		feature 23 The standard deviation of the beam lengths divided by the maximal length
+	3. adaboost train for rooms and hallway. it take quite long time.
+	4. save model
+
+II. Classify steps:
+	1. load target image
+	2. calc LaserScannerFeatures for each pixel of target.
+	3. predict feature for room and hallway.
+	4. calc room_certanity and hallway_certanity
+	room_certanity = (std::exp((double)room_sum)) / (std::exp(-1 * (double)room_sum) + std::exp((double)room_sum));
+	hallway_certanity = (std::exp((double)hallway_sum)) / (std::exp(-1 * (double)hallway_sum) + std::exp((double)hallway_sum));
+
+
+
+
+
+
+
+
+
+

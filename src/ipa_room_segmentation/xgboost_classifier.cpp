@@ -8,25 +8,21 @@
 #include <ipa_room_segmentation/xgboost_classifier.h>
 #include <ipa_room_segmentation/wavefront_region_growing.h>
 
-bool XgboostClassifier::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& segmented_map, double map_resolution_from_subscription,
+bool XgboostClassifier::segmentMap(const cv::Mat& map_to_be_labeled, const cv::Mat& map_features, cv::Mat& segmented_map, double map_resolution_from_subscription,
   double room_area_factor_lower_limit, double room_area_factor_upper_limit) {
   std::cout << "Start prediction..." << std::endl;
 
   cv::Mat original_map_to_be_labeled = cv::Mat(map_to_be_labeled.size(), CV_8U);
 
-  std::vector<double> temporary_beams;
-  std::vector<float> temporary_features;
-  LaserScannerFeatures lsf;
-
   assert(_booster != NULL && trained_);
+
+  int feature_cnt = 0;
+#pragma omp parallel for
   for (int y = 0; y < map_to_be_labeled.rows; y++) {
+    LaserScannerFeatures lsf;
     for (int x = 0; x < map_to_be_labeled.cols; x++) {
-      if (map_to_be_labeled.at<unsigned char>(y, x) != 0) {
-        //simulate the beams and features for every position and save it
-        raycasting_.raycasting(map_to_be_labeled, cv::Point(x, y), temporary_beams);
-        cv::Mat features;
-        lsf.get_features(temporary_beams, angles_for_simulation_, cv::Point(x, y), features);
-        temporary_features.resize(features.cols);
+      if (original_map_to_be_labeled.at<unsigned char>(y, x) == 255) {
+        cv::Mat features = map_features.row(feature_cnt); //OpenCV expects a 32-floating-point Matrix as feature input
 
         Matrix d_features(1, 23);
         d_features << features.at<float>(0, 0), features.at<float>(0, 1), features.at<float>(0, 2), features.at<float>(0, 3), features.at<float>(0, 4)

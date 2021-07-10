@@ -346,7 +346,7 @@ int main(int argc, char* argv[]) {
   //segmentation_names.push_back("1morphological");
   //segmentation_names.push_back("2distance");
   //segmentation_names.push_back("3voronoi");
-  //segmentation_names.push_back("4semantic");
+  segmentation_names.push_back("4semantic");
   //segmentation_names.push_back("5vrf");
   segmentation_names.push_back("6xgboost");
 
@@ -373,9 +373,11 @@ int main(int argc, char* argv[]) {
     cv::Mat original_img;
 
     bool preprocess = true;
+    cv::Mat features_to_classify;
     if (preprocess) {
       //pre-process the image.
-      pre.Process(map, original_img);
+      features_to_classify = pre.Process(map, original_img);
+      std::cout << "pre-process done and test map: " << image_filename << " has " << features_to_classify.size().height << std::endl;
     }
     else
       original_img = map.clone();
@@ -425,7 +427,7 @@ int main(int argc, char* argv[]) {
         double room_upper_limit_semantic_ = 1000000.;
         AdaboostClassifier semantic_segmentation; //semantic segmentation method
         const std::string classifier_path = package_path + "files\\classifier_models\\";
-        semantic_segmentation.segmentMap(original_img, segmented_map, map_resolution, room_lower_limit_semantic_, room_upper_limit_semantic_,
+        semantic_segmentation.segmentMap(original_img, features_to_classify, segmented_map, map_resolution, room_lower_limit_semantic_, room_upper_limit_semantic_,
           classifier_path);
       }
 
@@ -447,9 +449,9 @@ int main(int argc, char* argv[]) {
         doorway_points_.clear();
         double room_lower_limit_semantic_ = 1.0;
         double room_upper_limit_semantic_ = 1000000.;
-        XgboostClassifier xgClassifier(xgboost_path);
-        xgClassifier.segmentMap(original_img, segmented_map, map_resolution, room_lower_limit_semantic_, room_upper_limit_semantic_);
         std::cout << "You have chosen the xgboost segmentation." << std::endl;
+        XgboostClassifier xgClassifier(xgboost_path);
+        xgClassifier.segmentMap(original_img, features_to_classify, segmented_map, map_resolution, room_lower_limit_semantic_, room_upper_limit_semantic_);
       }
 
       if (room_segmentation_algorithm == 99) {

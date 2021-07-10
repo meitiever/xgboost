@@ -219,7 +219,7 @@ void AdaboostClassifier::trainClassifiers(const std::vector<cv::Mat>& room_train
   std::cout << "Finished training the algorithm." << std::endl;
 }
 
-bool AdaboostClassifier::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& segmented_map, double map_resolution_from_subscription,
+bool AdaboostClassifier::segmentMap(const cv::Mat& map_to_be_labeled, const cv::Mat& map_features, cv::Mat& segmented_map, double map_resolution_from_subscription,
   double room_area_factor_lower_limit, double room_area_factor_upper_limit, const std::string& classifier_storage_path, bool display_results) {
   //******************Semantic-labeling function based on AdaBoost*****************************
   //This function calculates single-valued features for every white Pixel in the given occupancy-gridmap and classifies it
@@ -273,6 +273,7 @@ bool AdaboostClassifier::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& s
   }
 
   //*************** II. Go trough each Point and label it as room or hallway.**************************
+  int feature_cnt = 0;
 #pragma omp parallel for
 
   for (int y = 0; y < original_map_to_be_labeled.rows; y++) {
@@ -280,13 +281,8 @@ bool AdaboostClassifier::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& s
 
     for (int x = 0; x < original_map_to_be_labeled.cols; x++) {
       if (original_map_to_be_labeled.at<unsigned char>(y, x) == 255) {
-        std::vector<double> temporary_beams;
-        raycasting_.raycasting(original_map_to_be_labeled, cv::Point(x, y), temporary_beams);
-        std::vector<float> temporary_features;
-        cv::Mat features_mat; //OpenCV expects a 32-floating-point Matrix as feature input
-        lsf.get_features(temporary_beams, angles_for_simulation_, cv::Point(x, y), features_mat);
-        //classify each Point
-
+        cv::Mat features_mat = map_features.row(feature_cnt); //OpenCV expects a 32-floating-point Matrix as feature input
+        feature_cnt++;
         float room_sum = room_boost_->predict(features_mat);
         float hallway_sum = hallway_boost_->predict(features_mat);
         //get the certanity-values for each class (it shows the probability that it belongs to the given class)
