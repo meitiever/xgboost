@@ -50,27 +50,18 @@ using namespace std;
 
 static void help(char** argv)
 {
-  cout << "\nThis sample program demonstrates the room segmentation algorithm\n"
+  cout << "This sample program demonstrates the room segmentation algorithm\n"
     << "Call:\n"
-    << argv[0] << " --root D:\\Github\\Tools\\xgboost\\" << endl
-    << " --train_semantic true" << endl
-    << " --pase_to_xgboost true" << endl;
+    << argv[0] << " --help h ? |      | print help message" << endl
+    << "--root     | D:\\Github\\Tools\\xgboost\\ | root path of file" << endl
+    << "--train_semantic | false | train adaboost classifier." << endl
+    << "--train_vrf      | false | train vrf classifier." << endl
+    << "--map_resolution | 0.015 | map resolution." << endl
+    << "--save_to_csv    | false | parse features to xgboost libsvm format." << endl
+    << "--xgboost_model  | files\\classifier_models\\semantic_room_xgboost_r100.model | xgboost config files path semantic_room_xgboost_r100.model";
 }
 
 int main(int argc, char* argv[]) {
-  //try {
-  //  std::cout << "parse parameter." << std::endl;
-  //  xgboost::CLI cli(argc, argv);
-  //  std::cout << "xgboost run." << std::endl;
-  //  return cli.Run();
-  //}
-  //catch (dmlc::Error const& e) {
-  //  // This captures only the initialization error.
-  //  xgboost::CLIError(e);
-  //  return 1;
-  //}
-  //return 0;
-
   cv::CommandLineParser parser(argc, argv,
     "{help h ? |      | help message}"
     "{root     | D:\\Github\\Tools\\xgboost\\ | root path of file }"
@@ -103,11 +94,11 @@ int main(int argc, char* argv[]) {
   std::string path = parser.get<std::string>("xgboost_model");
   std::string xgboost_path = package_path + path;
 
-  if (!boost::filesystem::is_regular_file(xgboost_path))
-  {
-    cerr << "File : " << xgboost_path << " does not exists." << endl;
-    exit(-1);
-  }
+  //if (!boost::filesystem::is_regular_file(xgboost_path))
+  //{
+  //  cerr << "File : " << xgboost_path << " does not exists." << endl;
+  //  exit(-1);
+  //}
 
   double map_resolution = parser.get<double>("map_resolution");
 
@@ -352,11 +343,11 @@ int main(int argc, char* argv[]) {
 
   PreProcessor pre;
   std::vector<std::string> segmentation_names;
-  //segmentation_names.push_back("1morphological");
-  //segmentation_names.push_back("2distance");
-  //segmentation_names.push_back("3voronoi");
-  //segmentation_names.push_back("4semantic");
-  //segmentation_names.push_back("5vrf");
+  segmentation_names.push_back("1morphological");
+  segmentation_names.push_back("2distance");
+  segmentation_names.push_back("3voronoi");
+  segmentation_names.push_back("4semantic");
+  segmentation_names.push_back("5vrf");
   segmentation_names.push_back("6xgboost");
 
   std::vector<cv::Mat> results(segmentation_names.size());
