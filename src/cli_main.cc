@@ -343,11 +343,11 @@ int main(int argc, char* argv[]) {
 
   PreProcessor pre;
   std::vector<std::string> segmentation_names;
-  segmentation_names.push_back("1morphological");
-  segmentation_names.push_back("2distance");
-  segmentation_names.push_back("3voronoi");
-  segmentation_names.push_back("4semantic");
-  segmentation_names.push_back("5vrf");
+  //segmentation_names.push_back("1morphological");
+  //segmentation_names.push_back("2distance");
+  //segmentation_names.push_back("3voronoi");
+  //segmentation_names.push_back("4semantic");
+  //segmentation_names.push_back("5vrf");
   segmentation_names.push_back("6xgboost");
 
   std::vector<cv::Mat> results(segmentation_names.size());
@@ -449,8 +449,7 @@ int main(int argc, char* argv[]) {
         double room_upper_limit_semantic_ = 1000000.;
         XgboostClassifier xgClassifier(xgboost_path);
         xgClassifier.segmentMap(original_img, segmented_map, map_resolution, room_lower_limit_semantic_, room_upper_limit_semantic_);
-        std::cout << "You have chosen the Voronoi random field segmentation." << std::endl;
-        continue;
+        std::cout << "You have chosen the xgboost segmentation." << std::endl;
       }
 
       if (room_segmentation_algorithm == 99) {
