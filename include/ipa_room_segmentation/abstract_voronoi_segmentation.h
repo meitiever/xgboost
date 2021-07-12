@@ -75,7 +75,7 @@ protected:
   // Function that goes trough each given room and checks if it should be merged together wit another bigger room, if it is too small.
   // This function takes the segmented Map from the original Voronoi-segmentation-algorithm and merges rooms together,
   // that are small enough and have only two or one neighbor.
-  void mergeRooms(cv::Mat& map_to_merge_rooms, std::vector<Room>& rooms, double map_resolution_from_subscription, double max_area_for_merging, bool display_map);
+  void mergeRooms(cv::Mat& map_to_merge_rooms, std::vector<Room>& rooms, double map_resolution_from_subscription, double max_area_for_merging);
 
 public:
 

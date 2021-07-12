@@ -425,11 +425,10 @@ int main(int argc, char* argv[]) {
         double max_iterations_ = 150;
         double min_critical_point_distance_factor_ = 0.5;
         double max_area_for_merging_ = 12.5;
-        bool display_segmented_map_ = false;
         std::cout << "You have chosen the Voronoi segmentation" << std::endl;
         VoronoiSegmentation voronoi_segmentation; //voronoi segmentation method
         voronoi_segmentation.segmentMap(original_img, segmented_map, map_resolution, room_lower_limit_voronoi_, room_upper_limit_voronoi_,
-          voronoi_neighborhood_index_, max_iterations_, min_critical_point_distance_factor_, max_area_for_merging_, display_segmented_map_, draw_obstacles);
+          voronoi_neighborhood_index_, max_iterations_, min_critical_point_distance_factor_, max_area_for_merging_, draw_obstacles);
       }
 
       if (room_segmentation_algorithm == 4) { //semantic

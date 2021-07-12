@@ -1,10 +1,9 @@
-#include <ipa_room_segmentation/voronoi_segmentation.h>
-
-#include <ipa_room_segmentation/wavefront_region_growing.h>
-#include <ipa_room_segmentation/contains.h>
+#include <set>
 
 #include <ipa_room_segmentation/timer.h>
-#include <set>
+#include <ipa_room_segmentation/contains.h>
+#include <ipa_room_segmentation/voronoi_segmentation.h>
+#include <ipa_room_segmentation/wavefront_region_growing.h>
 
 VoronoiSegmentation::VoronoiSegmentation()
 {
@@ -12,7 +11,7 @@ VoronoiSegmentation::VoronoiSegmentation()
 
 void VoronoiSegmentation::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& segmented_map, double map_resolution_from_subscription,
   double room_area_factor_lower_limit, double room_area_factor_upper_limit, int neighborhood_index, int max_iterations,
-  double min_critical_point_distance_factor, double max_area_for_merging, bool display_map, bool draw_obstacles)
+  double min_critical_point_distance_factor, double max_area_for_merging, bool draw_obstacles)
 {
   //****************Create the Generalized Voronoi-Diagram**********************
   //This function takes a given map and segments it with the generalized Voronoi-Diagram. It takes following steps:
@@ -318,12 +317,6 @@ void VoronoiSegmentation::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& 
   //3.fill the last white areas with the surrounding color
   wavefrontRegionGrowing(segmented_map);
 
-  if (display_map == true)
-  {
-    cv::imshow("before", segmented_map);
-    cv::waitKey(1);
-  }
-
   //4.merge the rooms together if neccessary
-  mergeRooms(segmented_map, rooms, map_resolution_from_subscription, max_area_for_merging, display_map);
+  mergeRooms(segmented_map, rooms, map_resolution_from_subscription, max_area_for_merging);
 }
