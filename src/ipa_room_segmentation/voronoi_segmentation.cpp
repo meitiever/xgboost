@@ -12,7 +12,7 @@ VoronoiSegmentation::VoronoiSegmentation()
 
 void VoronoiSegmentation::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& segmented_map, double map_resolution_from_subscription,
   double room_area_factor_lower_limit, double room_area_factor_upper_limit, int neighborhood_index, int max_iterations,
-  double min_critical_point_distance_factor, double max_area_for_merging, bool display_map)
+  double min_critical_point_distance_factor, double max_area_for_merging, bool display_map, bool draw_obstacles)
 {
   //****************Create the Generalized Voronoi-Diagram**********************
   //This function takes a given map and segments it with the generalized Voronoi-Diagram. It takes following steps:
@@ -137,19 +137,11 @@ void VoronoiSegmentation::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& 
     }
   }
 
-  //	if(display_map == true)
-  //	{
-  //		cv::Mat display = map_to_be_labeled.clone();
-  //		for (size_t i=0; i<critical_points.size(); ++i)
-  //			cv::circle(display, critical_points[i], 2, cv::Scalar(128), -1);
-  //		cv::imshow("critical points", display);
-  //	}
+  //
+  //*************III. draw the critical lines from every found critical Point to its two closest zero-pixel****************
+  //
 
-    //
-    //*************III. draw the critical lines from every found critical Point to its two closest zero-pixel****************
-    //
-
-    //map to draw the critical lines and fill the map with random colors
+  //map to draw the critical lines and fill the map with random colors
   map_to_be_labeled.convertTo(segmented_map, CV_32SC1, 256, 0); // rescale to 32 int, 255 --> 255*256 = 65280
 
   // 1. Get the points of the contour, which are the possible closest points for a critical point
@@ -275,10 +267,8 @@ void VoronoiSegmentation::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& 
       cv::line(voronoi_map, critical_points[first_critical_point], basis_points_2[first_critical_point], cv::Scalar(0), 2);
     }
   }
-  //	if(display_map == true)
-  //		cv::imshow("voronoi_map", voronoi_map);
 
-    //***********************Find the Contours seperated from the critcal lines and fill them with color******************
+  //***********************Find the Contours seperated from the critcal lines and fill them with color******************
 
   std::vector < cv::Scalar > already_used_colors; //saving-vector to save the already used coloures
 
@@ -287,7 +277,7 @@ void VoronoiSegmentation::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& 
   std::vector<Room> rooms; //Vector to save the rooms in this map
 
   //1. Erode map one time, so small gaps are closed
-//	cv::erode(voronoi_map_, voronoi_map_, cv::Mat(), cv::Point(-1, -1), 1);
+  //	 cv::erode(voronoi_map_, voronoi_map_, cv::Mat(), cv::Point(-1, -1), 1);
   cv::findContours(voronoi_map, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
 
   for (int current_contour = 0; current_contour < contours.size(); current_contour++)

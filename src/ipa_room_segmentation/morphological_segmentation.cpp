@@ -8,7 +8,7 @@ MorphologicalSegmentation::MorphologicalSegmentation()
 }
 
 void MorphologicalSegmentation::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat& segmented_map, double map_resolution_from_subscription,
-  double room_area_factor_lower_limit, double room_area_factor_upper_limit)
+  double room_area_factor_lower_limit, double room_area_factor_upper_limit, bool draw_obstacles)
 {
   /*This segmentation algorithm does:
    * 1. collect the map data
@@ -99,39 +99,41 @@ void MorphologicalSegmentation::segmentMap(const cv::Mat& map_to_be_labeled, cv:
   //*************************obstacles***********************
   //get obstacle informations and draw them into the new map
 
-  std::cout << "starting getting obstacle information" << std::endl;
-  for (int row = 0; row < map_to_be_labeled.rows; ++row)
-  {
-    for (int col = 0; col < map_to_be_labeled.cols; ++col)
+  if (draw_obstacles) {
+    std::cout << "starting getting obstacle information" << std::endl;
+    for (int row = 0; row < map_to_be_labeled.rows; ++row)
     {
-      //find obstacles = black pixels
-      if (map_to_be_labeled.at<unsigned char>(row, col) == 0)
+      for (int col = 0; col < map_to_be_labeled.cols; ++col)
       {
-        segmented_map.at<int>(row, col) = 0;
+        //find obstacles = black pixels
+        if (map_to_be_labeled.at<unsigned char>(row, col) == 0)
+        {
+          segmented_map.at<int>(row, col) = 0;
+        }
       }
     }
+
+    std::cout << "drawn obstacles in map" << std::endl;
+    //**************spread the colored region by making white pixel around a contour their color****************
+    //spread the coloured regions to the white Pixels
+    wavefrontRegionGrowing(segmented_map);
   }
 
-  std::cout << "drawn obstacles in map" << std::endl;
-  //**************spread the colored region by making white pixel around a contour their color****************
-  //spread the coloured regions to the white Pixels
-  wavefrontRegionGrowing(segmented_map);
-  std::vector<int> vals;
+  //std::vector<int> vals;
+  //for (int row = 0; row < segmented_map.rows; ++row) {
+  //  for (int col = 0; col < segmented_map.cols; ++col) {
+  //    //find obstacles = black pixels
+  //    if (!contains(vals, segmented_map.at<int>(row, col))) {
+  //      vals.push_back(segmented_map.at<int>(row, col));
+  //    }
+  //  }
+  //}
 
-  for (int row = 0; row < segmented_map.rows; ++row) {
-    for (int col = 0; col < segmented_map.cols; ++col) {
-      //find obstacles = black pixels
-      if (!contains(vals, segmented_map.at<int>(row, col))) {
-        vals.push_back(segmented_map.at<int>(row, col));
-      }
-    }
-  }
+  //std::cout << "number of values in segmented map:" << vals.size() << std::endl;
 
-  std::cout << "number of values in segmented map:" << vals.size() << std::endl;
-
-  for (int i = 0; i < vals.size(); i++) {
-    std::cout << vals[i] << " ";
-  }
+  //for (int i = 0; i < vals.size(); i++) {
+  //  std::cout << vals[i] << " ";
+  //}
 
   std::cout << std::endl;
   std::cout << "filled white pixels in new map" << std::endl;

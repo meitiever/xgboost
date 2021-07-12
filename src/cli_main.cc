@@ -57,6 +57,8 @@ static void help(char** argv)
     << "--train_semantic | false | train adaboost classifier." << endl
     << "--train_vrf      | false | train vrf classifier." << endl
     << "--map_resolution | 0.015 | map resolution." << endl
+    << "--preprocess     | false | do pre process." << endl
+    << "--draw_obstacles | false | draw obstacles on segmented map." << endl
     << "--save_to_csv    | false | parse features to xgboost libsvm format." << endl
     << "--xgboost_model  | files\\classifier_models\\semantic_room_xgboost_r100.model | xgboost config files path semantic_room_xgboost_r100.model";
 }
@@ -68,6 +70,8 @@ int main(int argc, char* argv[]) {
     "{train_semantic | false | train adaboost classifier. }"
     "{train_vrf      | false | train vrf classifier. }"
     "{map_resolution | 0.015 | map resolution. }"
+    "{draw_obstacles | false | draw obstacles on segmented map. }"
+    "{preprocess     | false | parse features to xgboost libsvm format. }"
     "{save_to_csv    | false | parse features to xgboost libsvm format. }"
     "{xgboost_model  | files\\classifier_models\\semantic_room_xgboost_r100.model | xgboost config files path semantic_room_xgboost_r100.model }"
   );
@@ -78,10 +82,17 @@ int main(int argc, char* argv[]) {
     return 0;
   }
 
+  double map_resolution = parser.get<double>("map_resolution");
+  std::cout << "parameter map_resolution set to " << map_resolution << std::endl;
+
   bool save_to_csv = parser.get<bool>("save_to_csv");
-  if (save_to_csv) {
-    std::cout << "parameter pase_to_xgboost set to true." << std::endl;
-  }
+  std::cout << "parameter save_to_csv set to " << (save_to_csv ? "true" : "false") << std::endl;
+
+  bool draw_obstacles = parser.get<bool>("draw_obstacles");
+  std::cout << "parameter draw_obstacles set to " << (draw_obstacles ? "true" : "false") << std::endl;
+
+  bool preprocess = parser.get<bool>("preprocess");
+  std::cout << "parameter preprocess set to " << (preprocess ? "true" : "false") << std::endl;
 
   std::string package_path = parser.get<std::string>("root");
 
@@ -94,13 +105,11 @@ int main(int argc, char* argv[]) {
   std::string path = parser.get<std::string>("xgboost_model");
   std::string xgboost_path = package_path + path;
 
-  //if (!boost::filesystem::is_regular_file(xgboost_path))
-  //{
-  //  cerr << "File : " << xgboost_path << " does not exists." << endl;
-  //  exit(-1);
-  //}
-
-  double map_resolution = parser.get<double>("map_resolution");
+  if (!boost::filesystem::is_regular_file(xgboost_path))
+  {
+    cerr << "File : " << xgboost_path << " does not exists." << endl;
+    exit(-1);
+  }
 
   std::vector<std::string> map_names;
   map_names.push_back("sineva01");
@@ -195,6 +204,9 @@ int main(int argc, char* argv[]) {
   bool train_semantic_, train_vrf_;
   train_semantic_ = parser.get<bool>("train_semantic");
   train_vrf_ = parser.get<bool>("train_vrf");
+
+  std::cout << "parameter train_semantic_ set to " << (train_semantic_ ? "true" : "false") << std::endl;
+  std::cout << "parameter train_vrf_ set to " << (train_vrf_ ? "true" : "false") << std::endl;
 
   if (train_vrf_) {
     std::cout << "parameter train_vrf set to true." << std::endl;
@@ -344,11 +356,11 @@ int main(int argc, char* argv[]) {
   PreProcessor pre;
   std::vector<std::string> segmentation_names;
   //segmentation_names.push_back("1morphological");
-  //segmentation_names.push_back("2distance");
+  segmentation_names.push_back("2distance");
   //segmentation_names.push_back("3voronoi");
-  segmentation_names.push_back("4semantic");
+  //segmentation_names.push_back("4semantic");
   //segmentation_names.push_back("5vrf");
-  segmentation_names.push_back("6xgboost");
+  //segmentation_names.push_back("6xgboost");
 
   std::vector<cv::Mat> results(segmentation_names.size());
   for (size_t i = 0; i < segmentation_names.size(); ++i)
@@ -372,7 +384,6 @@ int main(int argc, char* argv[]) {
     cv::Mat map = cv::imread(image_filename.c_str(), 0);
     cv::Mat original_img;
 
-    bool preprocess = true;
     cv::Mat features_to_classify;
     if (preprocess) {
       //pre-process the image.
@@ -396,7 +407,7 @@ int main(int argc, char* argv[]) {
         double room_upper_limit_morphological_ = 47.0;
         std::cout << "You have chosen the morphological segmentation." << std::endl;
         MorphologicalSegmentation morphological_segmentation; //morphological segmentation method
-        morphological_segmentation.segmentMap(original_img, segmented_map, map_resolution, room_lower_limit_morphological_, room_upper_limit_morphological_);
+        morphological_segmentation.segmentMap(original_img, segmented_map, map_resolution, room_lower_limit_morphological_, room_upper_limit_morphological_, draw_obstacles);
       }
 
       if (room_segmentation_algorithm == 2) { //distance
@@ -404,7 +415,7 @@ int main(int argc, char* argv[]) {
         double room_upper_limit_distance_ = 163.0;
         std::cout << "You have chosen the distance segmentation." << std::endl;
         DistanceSegmentation distance_segmentation; //distance segmentation method
-        distance_segmentation.segmentMap(original_img, segmented_map, map_resolution, room_lower_limit_distance_, room_upper_limit_distance_);
+        distance_segmentation.segmentMap(original_img, segmented_map, map_resolution, room_lower_limit_distance_, room_upper_limit_distance_, draw_obstacles);
       }
 
       if (room_segmentation_algorithm == 3) { //voronoi
@@ -418,7 +429,7 @@ int main(int argc, char* argv[]) {
         std::cout << "You have chosen the Voronoi segmentation" << std::endl;
         VoronoiSegmentation voronoi_segmentation; //voronoi segmentation method
         voronoi_segmentation.segmentMap(original_img, segmented_map, map_resolution, room_lower_limit_voronoi_, room_upper_limit_voronoi_,
-          voronoi_neighborhood_index_, max_iterations_, min_critical_point_distance_factor_, max_area_for_merging_, display_segmented_map_);
+          voronoi_neighborhood_index_, max_iterations_, min_critical_point_distance_factor_, max_area_for_merging_, display_segmented_map_, draw_obstacles);
       }
 
       if (room_segmentation_algorithm == 4) { //semantic
