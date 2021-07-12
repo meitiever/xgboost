@@ -17,12 +17,12 @@ void DistanceSegmentation::segmentMap(const cv::Mat& map_to_be_labeled, cv::Mat&
   cv::Mat temporary_map = map_to_be_labeled.clone();
   //variables for thresholding and finding the room-areas
   cv::Mat thresh_map;
-  std::vector < std::vector<cv::Point>> contours;
+  std::vector<std::vector<cv::Point>> contours;
   //hierarchy saves if the contours are hole-contours:
   //hierarchy[{0,1,2,3}]={next contour (same level), previous contour (same level), child contour, parent contour}
   //child-contour = 1 if it has one, = -1 if not, same for parent_contour
-  std::vector < cv::Vec4i > hierarchy, hierarchy_saver;
-  std::vector < std::vector<cv::Point>> temporary_contours;
+  std::vector<cv::Vec4i> hierarchy, hierarchy_saver;
+  std::vector<std::vector<cv::Point>> temporary_contours;
   //
   //Segmentation of a gridmap into roomlike areas based on the distance-transformation of the map
   //
